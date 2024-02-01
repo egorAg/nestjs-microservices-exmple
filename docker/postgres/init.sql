@@ -1,0 +1,3 @@
+CREATE USER filosoft;
+CREATE DATABASE filosoft;
+GRANT ALL PRIVILEGES ON DATABASE filosoft TO filosoft;

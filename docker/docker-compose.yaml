@@ -1,0 +1,48 @@
+version: '3.8'
+name: student_service_filosoft
+services:
+  nats:
+    container_name: nats_container
+    image: 'nats:latest'
+    expose:
+      - ${NATS_EXPOSE}
+    ports:
+      - '${NATS_MONITORING}:8222'
+      - '${NATS_EXPOSE}:4222'
+    volumes:
+      - nats_vol:/data
+  postgres:
+    container_name: psql_container
+    build: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123456}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres_db}
+      PGDATA: ${PGDATA:-/data/postgres}
+    volumes:
+      - postgres_vol:${PGDATA:-/data/postgres}
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    networks:
+      - postgres_bridge
+    restart: unless-stopped
+  pgadmin:
+    container_name: pgadmin_container
+    build: ./pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-123456}
+    volumes:
+      - pgadmin_vol:/root/.pgadmin
+    ports:
+      - '${PGADMIN_PORT:-5050}:80'
+    networks:
+      - postgres_bridge
+    restart: unless-stopped
+networks:
+  postgres_bridge:
+    driver: bridge
+volumes:
+  postgres_vol:
+  pgadmin_vol:
+  nats_vol:
